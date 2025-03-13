@@ -1,74 +1,103 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useFonts } from "expo-font";
+import { Text, View, StyleSheet, Pressable } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function Timer() {
 
-export default function HomeScreen() {
+  const [fontsLoaded] = useFonts({
+    "Red Hat Display": require("@/assets/fonts/RedHatDisplay-Regular.ttf"),
+  });
+  const [counter, setCounter] = useState(0);
+
+  const scale = useSharedValue(1);
+  const animateStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.85, { damping: 10 });
+    setCounter(counter + 1);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 10 });
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <LinearGradient
+      colors={["#6B5E31", "#442800"]}
+      style={styles.container}
+    >
+      <Text style={styles.title}>Warm-up</Text>
+      <View style={styles.counter_container}>
+        <Text style={styles.counter}>15:00</Text>
+      </View>
+      <View style={styles.routine_container}>
+        <Text style={styles.routine_text}>Jumping Jacks</Text>
+        <Text style={styles.routine_subtext}>64 minutes</Text>
+      </View>
+      <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
+        <Animated.View style={[styles.button, animateStyle]}>
+          <Ionicons name="play-outline" size={50} color="white" />
+        </Animated.View>
+      </Pressable>
+      <Ionicons name="pause-outline" size={40} color="white" />
+      <Text style={styles.routine_text}>{counter}</Text>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: " #6B5E31 0%, #442800 100%",
+    alignItems: "center",
+    paddingHorizontal: 40,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    color: "rgba(255, 255, 255, 0.60)",
+    fontSize: 24,
+    fontFamily: "Red Hat Display",
+    marginTop: 80,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  counter: {
+    fontSize: 64,
+    color: "white",
+    fontFamily: "Red Hat Display",
+  },
+  counter_container: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 150,
+  },
+  routine_container: {
+    width: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.20)",
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+    borderRadius: 10,
+    gap: 7,
+    marginTop: 80,
+  },
+  routine_text: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "600",
+    fontFamily: "Red Hat Display",
+  },
+  routine_subtext: {
+    color: "rgba(255, 255, 255, 0.60)",
+    fontSize: 10,
+    fontFamily: "Red Hat Display",
+  },
+  button: {
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 80,
   },
 });
