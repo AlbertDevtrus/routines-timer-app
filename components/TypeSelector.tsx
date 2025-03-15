@@ -7,14 +7,18 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import SvgIcon from "./SvgIcon";
 
-export default function TypeSelector() {
+interface Props {
+    setType: (type: "rest" | "warm-up" | "workout") => void;
+}
+
+export default function TypeSelector({ setType }: Props) {
     const [selectedType, setSelectedType] = useState<"rest" | "warm-up" | "workout" | null>(null);
 
     const animatedStyle = (type: "rest" | "warm-up" | "workout") =>
         useAnimatedStyle(() => ({
             flex: selectedType === type ? withTiming(2, { duration: 300 }) : withTiming(1, { duration: 300 })
         })
-        );
+    );
 
     const restFlex = useSharedValue(1);
     const warmUpFlex = useSharedValue(1);
@@ -22,6 +26,7 @@ export default function TypeSelector() {
 
     const handlePress = (type: "rest" | "warm-up" | "workout") => {
         setSelectedType(type);
+        setType(type);
         restFlex.value = withTiming(type === "rest" ? 2 : 1, { duration: 150 });
         warmUpFlex.value = withTiming(type === "warm-up" ? 2 : 1, { duration: 150 });
         workoutFlex.value = withTiming(type === "workout" ? 2 : 1, { duration: 150 });

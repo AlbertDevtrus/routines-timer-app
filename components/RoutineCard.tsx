@@ -16,7 +16,6 @@ export default function RoutineCard({ title, duration, id }: Props) {
                 <Text style={styles.routine_subtext}>{duration} minutes</Text>
             </View>
         </Link>
-
     );
 }
 
@@ -40,7 +39,7 @@ const styles = StyleSheet.create({
     },
     routine_subtext: {
         color: "rgba(255, 255, 255, 0.60)",
-        fontSize: 10,
+        fontSize: 12,
         fontFamily: "Red Hat Display",
     },
 });

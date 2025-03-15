@@ -1,30 +1,59 @@
 import { Modal, View, Text, Pressable, StyleSheet, TextInput } from 'react-native';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import TypeSelector from './TypeSelector';
+import { Excersies } from '@/types';
+import TimeInput from './TimeInput';
 
 type Props = PropsWithChildren<{
     isVisible: boolean;
     onClose: () => void;
+    setExcersies: (excersies: Excersies[]) => void;
+    order: number;
 }>;
 
-export default function AddCounterModal({ isVisible, children, onClose }: Props) {
+export default function AddCounterModal({ isVisible, onClose, setExcersies, order }: Props) {
+    const [type, setType] = useState<"rest" | "warm-up" | "workout" | null>(null);
+    const [time, setTime] = useState<number | null>(null);
+
+    const handlePress = () => {
+        if (type && time) {
+            setExcersies((prevState: Excersies[]) => [
+                ...prevState,
+                { order, type, duration: time }
+            ]);
+            setTime(null);
+            setType(null);
+            onClose();
+        }
+    }
+
     return (
         <Modal animationType="fade" transparent={true} visible={isVisible} >
             <View style={styles.modalBackground}>
                 <View style={styles.titleContainer}>
-                    <Pressable onPress={onClose}>
+                    <Pressable onPress={() => {
+                        onClose()
+                        setTime(null)
+                        setType(null)
+                    }}>
                         <MaterialIcons name="close" color="#fff" size={22} />
                     </Pressable>
                 </View>
                 <View style={styles.modalContent}>
                     <View style={styles.input_container}>
                         <Text style={styles.label}>Select type</Text>
-                        <TypeSelector />
+                        <TypeSelector setType={setType} />
                     </View>
                     <View style={styles.input_container}>
                         <Text style={styles.label}>Time</Text>
-                        <TextInput style={styles.text_input} placeholder="Time (seconds)" placeholderTextColor="rgba(255,255,255,0.4)" />
+                        <TimeInput />
+                        <TextInput inputMode='numeric' keyboardType="numeric" style={styles.text_input} placeholder="Time (seconds)" placeholderTextColor="rgba(255,255,255,0.4)" value={time ? time?.toString(): ""} onChangeText={(Text) => setTime(Number(Text))} />
+                    </View>
+                    <View>
+                        <Pressable onPress={handlePress} style={({ pressed }) => [{ backgroundColor: pressed ? "rgba(0, 5, 5, 0.40)" : "rgba(0, 5, 5, 0.20)" }, styles.button]}>
+                            <Text style={styles.text}>Add</Text>
+                        </Pressable>
                     </View>
                 </View>
             </View>
@@ -78,6 +107,18 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 16,
         fontFamily: "Red Hat Display",
-        
     },
+    text: {
+        color: "white",
+        fontSize: 16,
+        fontFamily: "Red Hat Display",
+        textTransform: "capitalize",
+        textAlign: "center",
+    },
+    button: {
+        display: "flex",
+        paddingVertical: 10,
+        borderRadius: 20,
+        marginTop: 20,
+    }
 });

@@ -1,18 +1,13 @@
+import TrashIcon from "@/assets/icons/trash-icon.svg";
+
 import AddCounterModal from "@/components/AddCounterModal";
-import RoutineCard from "@/components/RoutineCard";
+import SvgIcon from "@/components/SvgIcon";
+import { Excersies } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { Text, StyleSheet, View, TextInput, Pressable } from "react-native";
-import { opacity } from "react-native-reanimated/lib/typescript/Colors";
-
-type Excersies = {
-  order: number;
-  type: "rest" | "warm-up" | "workout";
-  duration: number;
-};
 
 interface Routine {
   id: string;
@@ -66,6 +61,52 @@ export default function EditRoutine() {
     return `${minutes}:${remainingSeconds === 0 ? "00" : remainingSeconds}`;;
   }
 
+  const onRemoveExcersies = (order: number) => {
+    const newExcersies = excersies.filter((excersie) => excersie.order !== order);
+    const updatedExcersies = newExcersies.map((excersie, index) => ({ ...excersie, order: index + 1 }));
+
+    setExcersies(updatedExcersies);
+  }
+
+  const onSaveRoutine = async () => {
+    const duration = formatTime(excersies.reduce((acc, excersie) => acc + excersie.duration, 0));
+
+    const savedRoutines = await AsyncStorage.getItem("routines");
+    if (savedRoutines) {
+      const routines = JSON.parse(savedRoutines);
+      const updatedRoutines = routines.map((routine: Routine) => {
+        if (routine.id === routineId) {
+          return {
+            ...routine,
+            title,
+            description,
+            excersies,
+            duration
+          }
+        }
+
+        return routine;
+      });
+
+      await AsyncStorage.setItem("routines", JSON.stringify(updatedRoutines));
+    }
+
+    router.push("/routines");
+  };
+
+  const onDeleteRoutine = async () => {
+    const savedRoutines = await AsyncStorage.getItem("routines");
+
+    if (savedRoutines) {
+      const routines = JSON.parse(savedRoutines);
+      const updatedRoutines = routines.filter((routine: Routine) => routine.id !== routineId);
+
+      await AsyncStorage.setItem("routines", JSON.stringify(updatedRoutines));
+    }
+
+    router.push("/routines");
+  }
+
   const onAddCounter = () => {
     setIsModalVisible(true);
   };
@@ -103,16 +144,25 @@ export default function EditRoutine() {
             ]}
           >
             <Text style={[styles.text]}>{excersie.type}</Text>
-            <Text style={[styles.text, { color: "rgba(255, 255, 255, 0.8)" }]}>{formatTime(excersie.duration)}</Text>
+            <Text style={[styles.text, { color: "rgba(255, 255, 255, 0.8)", marginLeft: "auto", marginRight: 20 }]}>{formatTime(excersie.duration)}</Text>
+            <Pressable onPress={() => onRemoveExcersies(excersie.order)} style={({ pressed }) => [{ opacity: pressed ? 1 : 0.8 }]}>
+              <SvgIcon width={20} name={TrashIcon} height={20} color="white" />
+            </Pressable>
           </View>
         ))}
       </View>
-      <Pressable onPress={onAddCounter}>
-        <Text style={[styles.text, { marginTop: 20 }]}>Add Counter</Text>
+      <Pressable onPress={onAddCounter} style={({ pressed }) => [{ backgroundColor: pressed ? "rgba(0, 5, 5, 0.60)" : "rgba(0, 5, 5, 0.30)" }, styles.button]}>
+        <Text style={[styles.text, { textAlign: "center" }]}>Add Counter</Text>
       </Pressable>
-      <AddCounterModal isVisible={isModalVisible} onClose={onModalClose}>
-        <Text style={[styles.text]}>test</Text>
-      </AddCounterModal>
+      <View style={styles.buttons_container}>
+        <Pressable onPress={onDeleteRoutine} style={({ pressed }) => [{ backgroundColor: pressed ? "rgba(253, 0, 4, 0.40)" : "rgba(253, 0, 4, 0.26)" }, styles.secondary_button]}>
+          <Text style={[styles.text, { textAlign: "center" }]}>Delete</Text>
+        </Pressable>
+        <Pressable onPress={onSaveRoutine} style={({ pressed }) => [{ backgroundColor: pressed ? "rgba(0, 0, 0, 0.60)" : "rgba(0, 0, 0, 0.40)" }, styles.secondary_button]}>
+          <Text style={[styles.text, { textAlign: "center" }]}>Save</Text>
+        </Pressable>
+      </View>
+      <AddCounterModal isVisible={isModalVisible} onClose={onModalClose} setExcersies={setExcersies} order={excersies.length + 1} />
     </LinearGradient>
   );
 }
@@ -148,7 +198,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 20,
     paddingVertical: 13,
-    justifyContent: "space-between",
     alignItems: "center",
     borderRadius: 10,
   },
@@ -157,5 +206,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Red Hat Display",
     textTransform: "capitalize",
+  },
+  button: {
+    display: "flex",
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 20,
+  },
+  secondary_button: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    flex: 1,
+  },
+  buttons_container: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 20,
+    gap: 5,
   }
 });

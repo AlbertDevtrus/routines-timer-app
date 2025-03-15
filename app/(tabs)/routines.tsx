@@ -1,15 +1,10 @@
 import RoutineCard from "@/components/RoutineCard";
+import { Excersies } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, StyleSheet, View } from "react-native";
-
-type Excersies = {
-  order: number;
-  type: "rest" | "warm-up" | "workout";
-  duration: number;
-};
 
 interface Routine {
   id: string;
@@ -25,6 +20,7 @@ export default function Routines() {
 
   const getRoutines = async () => {
     const savedRoutines = await AsyncStorage.getItem("routines");
+    
     if (savedRoutines) {
       setRoutines(JSON.parse(savedRoutines));
     } else {
