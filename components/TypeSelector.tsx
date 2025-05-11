@@ -14,12 +14,6 @@ interface Props {
 export default function TypeSelector({ setType }: Props) {
     const [selectedType, setSelectedType] = useState<"rest" | "warm-up" | "workout" | null>(null);
 
-    const animatedStyle = (type: "rest" | "warm-up" | "workout") =>
-        useAnimatedStyle(() => ({
-            flex: selectedType === type ? withTiming(2, { duration: 300 }) : withTiming(1, { duration: 300 })
-        })
-    );
-
     const restFlex = useSharedValue(1);
     const warmUpFlex = useSharedValue(1);
     const workoutFlex = useSharedValue(1);

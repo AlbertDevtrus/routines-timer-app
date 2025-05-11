@@ -1,3 +1,4 @@
+import formatTime from "@/utilities/formatTime";
 import { Link } from "expo-router";
 import { View, Text, StyleSheet } from "react-native";
 
@@ -13,7 +14,7 @@ export default function RoutineCard({ title, duration, id }: Props) {
         <Link href={`/edit?routineId=${id}`} style={styles.link}>
             <View style={styles.routine_container}>
                 <Text style={styles.routine_text}>{title}</Text>
-                <Text style={styles.routine_subtext}>{duration} minutes</Text>
+                <Text style={styles.routine_subtext}>{formatTime(duration)} minutes</Text>
             </View>
         </Link>
     );

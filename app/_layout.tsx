@@ -21,6 +21,21 @@ export default function RootLayout() {
             },
           }}
         />
+        <Stack.Screen
+          name="add-routine"
+          options={{
+            title: 'Add routine',
+            headerStyle: {
+              backgroundColor: '#313B6B',
+            },
+            headerShadowVisible: false,
+            headerTitleStyle: {
+              fontFamily: 'Red Hat Display',
+              fontSize: 24,
+              color: 'white',
+            },
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="light" />

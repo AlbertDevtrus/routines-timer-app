@@ -1,51 +1,27 @@
 import RoutineCard from "@/components/RoutineCard";
-import { Excersies } from "@/types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRoutines } from "@/hooks/useRoutines";
+import { getSavedRoutines } from "@/utilities/routinesStorage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Text, StyleSheet, View } from "react-native";
-
-interface Routine {
-  id: string;
-  title: string;
-  description: string;
-  duration: number;
-  excersies: Excersies[];
-}
 
 export default function Routines() {
 
-  const [routines, setRoutines] = useState<Routine[]>([]);
-
-  const getRoutines = async () => {
-    const savedRoutines = await AsyncStorage.getItem("routines");
-    
-    if (savedRoutines) {
-      setRoutines(JSON.parse(savedRoutines));
-    } else {
-      const defaultRoutine: Routine = {
-        id: "0",
-        title: "Default routine",
-        description: "Warm-up routine",
-        duration: 75,
-        excersies: [
-          { order: 1, type: "warm-up", duration: 15 },
-          { order: 2, type: "workout", duration: 60 },
-        ],
-      }
-
-      setRoutines([defaultRoutine]);
-
-      await AsyncStorage.setItem("routines", JSON.stringify([defaultRoutine]));
-    }
-  };
+  const { routines, setRoutines } = useRoutines();
 
   useEffect(() => {
-    getRoutines();
+    const fetchRoutines = async () => {
+      const savedRoutines = await getSavedRoutines();
+      
+      console.log(savedRoutines);
+
+      setRoutines(savedRoutines);
+    };
+    
+    fetchRoutines();
   }, []);
-
-
+  
   return (
     <LinearGradient
       colors={["#313B6B", "#030B43"]}
@@ -57,6 +33,9 @@ export default function Routines() {
           <RoutineCard key={index} title={routine.title} duration={routine.duration} id={routine.id} />
         ))}
       </View>
+      <Link href={'/add-routine'} style={styles.button}>
+        <Text style={styles.text} >Add routine</Text>
+      </Link>
     </LinearGradient>
   );
 }
@@ -75,5 +54,19 @@ const styles = StyleSheet.create({
   },
   routines: {
     gap: 16,
+  },
+  text: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: "Red Hat Display",
+    textTransform: "capitalize",
+    textAlign: "center",
+  },
+  button: {
+    display: "flex",
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.40)",
   }
 });

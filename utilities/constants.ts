@@ -1,0 +1,1 @@
+export const EXCERSIES_HEIGHT = 47;

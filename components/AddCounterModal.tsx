@@ -3,7 +3,6 @@ import { PropsWithChildren, useState } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import TypeSelector from './TypeSelector';
 import { Excersies } from '@/types';
-import TimeInput from './TimeInput';
 
 type Props = PropsWithChildren<{
     isVisible: boolean;
@@ -47,7 +46,6 @@ export default function AddCounterModal({ isVisible, onClose, setExcersies, orde
                     </View>
                     <View style={styles.input_container}>
                         <Text style={styles.label}>Time</Text>
-                        <TimeInput />
                         <TextInput inputMode='numeric' keyboardType="numeric" style={styles.text_input} placeholder="Time (seconds)" placeholderTextColor="rgba(255,255,255,0.4)" value={time ? time?.toString(): ""} onChangeText={(Text) => setTime(Number(Text))} />
                     </View>
                     <View>
@@ -68,8 +66,8 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         backgroundColor: '#313B6B',
         bottom: 0,
-        borderEndEndRadius: 10,
-        borderStartEndRadius: 10
+        borderBottomRightRadius: 10,
+        borderBottomLeftRadius: 10
     },
     titleContainer: {
         backgroundColor: '#313B6B',
