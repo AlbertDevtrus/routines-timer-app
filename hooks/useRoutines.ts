@@ -11,7 +11,6 @@ export const useRoutines = () => {
   const getRoutine = async (routineId: string) => {
     const savedRoutines = await getSavedRoutines();
     if (savedRoutines) {
-      savedRoutines;
       const selectedRoutine: Routine | undefined = savedRoutines.find(
         (routine: Routine) => routine.id === routineId
       );

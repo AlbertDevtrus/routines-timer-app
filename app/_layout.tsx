@@ -7,7 +7,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="edit"
+          name="edit-routine"
           options={{
             title: 'Edit your routine',
             headerStyle: {

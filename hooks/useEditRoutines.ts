@@ -1,5 +1,4 @@
 import { Excersies, Routine } from "@/types";
-import formatTime from "@/utilities/formatTime";
 import { clearRoutines, getSavedRoutines, saveRoutines } from "@/utilities/routinesStorage";
 import { useRouter } from "expo-router";
 

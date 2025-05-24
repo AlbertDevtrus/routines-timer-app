@@ -11,7 +11,7 @@ interface Props {
 export default function RoutineCard({ title, duration, id }: Props) {
 
     return (
-        <Link href={`/edit?routineId=${id}`} style={styles.link}>
+        <Link href={`/edit-routine?routineId=${id}`} style={styles.link}>
             <View style={styles.routine_container}>
                 <Text style={styles.routine_text}>{title}</Text>
                 <Text style={styles.routine_subtext}>{formatTime(duration)} minutes</Text>
