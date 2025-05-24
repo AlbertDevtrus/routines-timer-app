@@ -7,7 +7,7 @@ import { Excersies } from '@/types';
 type Props = PropsWithChildren<{
     isVisible: boolean;
     onClose: () => void;
-    setExcersies: (excersies: Excersies[]) => void;
+    setExcersies: React.Dispatch<React.SetStateAction<Excersies[]>>;
     order: number;
 }>;
 

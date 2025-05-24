@@ -8,14 +8,13 @@ import { Text, StyleSheet, View } from "react-native";
 
 export default function Routines() {
 
+
   const { routines, setRoutines } = useRoutines();
 
   useEffect(() => {
     const fetchRoutines = async () => {
       const savedRoutines = await getSavedRoutines();
       
-      console.log(savedRoutines);
-
       setRoutines(savedRoutines);
     };
     
