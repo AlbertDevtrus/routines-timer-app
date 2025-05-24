@@ -4,10 +4,9 @@ import { getSavedRoutines } from "@/utilities/routinesStorage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { useEffect } from "react";
-import { Text, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View, ScrollView } from "react-native";
 
 export default function Routines() {
-
 
   const { routines, setRoutines } = useRoutines();
 
@@ -27,11 +26,21 @@ export default function Routines() {
       style={styles.container}
     >
       <Text style={styles.title}>Your routines!</Text>
-      <View style={styles.routines}>
-        {routines.map((routine, index) => (
-          <RoutineCard key={index} title={routine.title} duration={routine.duration} id={routine.id} />
-        ))}
-      </View>
+       <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.routines}>
+          {routines.map((routine, index) => (
+            <RoutineCard 
+              key={index} 
+              title={routine.title} 
+              duration={routine.duration} 
+              id={routine.id} 
+            />
+          ))}
+        </View>
+      </ScrollView>
       <Link href={'/add-routine'} style={styles.button}>
         <Text style={styles.text} >Add routine</Text>
       </Link>
@@ -49,10 +58,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontFamily: "Red Hat Display",
-    marginBottom: 60,
+    marginBottom: 35,
   },
   routines: {
-    gap: 16,
+    gap: 10,
   },
   text: {
     color: "white",
@@ -66,6 +75,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     marginTop: 20,
+    marginBottom: 20,
     backgroundColor: "rgba(0, 0, 0, 0.40)",
-  }
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 30,
+  },
 });
