@@ -1,22 +1,46 @@
 import formatTime from "@/utilities/formatTime";
 import { Link } from "expo-router";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import Animated from "react-native-reanimated";
 
 interface Props {
     title: string;
     duration: number;
     id: string;
+    isLink?: boolean;
+    isPressable?: boolean;
+    handlePress?: () => void;
+    handlePressOut?: () => void;
+    animateStyle?: any;
 }
 
-export default function RoutineCard({ title, duration, id }: Props) {
+export default function RoutineCard({ title, duration, id, isLink = true, isPressable = false, handlePress, handlePressOut, animateStyle }: Props) {
 
     return (
+        isLink ?  
         <Link href={`/edit-routine?routineId=${id}`} style={styles.link}>
             <View style={styles.routine_container}>
                 <Text style={styles.routine_text}>{title}</Text>
                 <Text style={styles.routine_subtext}>{formatTime(duration)} minutes</Text>
             </View>
         </Link>
+        :
+        isPressable ?
+        <Pressable onPressIn={handlePress} style={styles.link} onPressOut={handlePressOut}>
+            <Animated.View style={[styles.routine_container, animateStyle]}>
+                <Text style={styles.routine_text}>{title}</Text>
+                <Text style={styles.routine_subtext}>{formatTime(duration)} minutes</Text>
+            </Animated.View>
+        </Pressable>
+        : 
+        
+        <View style={styles.link}>
+            <View style={styles.routine_container}>
+                <Text style={styles.routine_text}>{title}</Text>
+                <Text style={styles.routine_subtext}>{formatTime(duration)} minutes</Text>
+            </View>
+        </View>
+        
     );
 }
 

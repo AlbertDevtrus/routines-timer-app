@@ -10,19 +10,7 @@ interface Props {
     onRemoveExcersies: (order: number) => void;
 }
 
-function listToObject(list: any) {
-    const values: any = Object.values(list);
-    const object: any = {};
-
-    for (let i = 0; i < values.length; i++) {
-        object[values[i].order] = i;
-    }
-
-    return object;
-}
-
 export function ExcersiesList({ excersies, onRemoveExcersies }: Props) {
-    const positions = listToObject(excersies);
 
     return (
         <>
@@ -39,7 +27,6 @@ export function ExcersiesList({ excersies, onRemoveExcersies }: Props) {
                             excersie={excersie}
                             order={excersie.order}
                             onRemoveExcersies={onRemoveExcersies}
-                            positions={positions}
                         />
                     ))
                 }

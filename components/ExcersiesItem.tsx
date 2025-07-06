@@ -9,16 +9,14 @@ import React, { useState } from "react";
 import { EXCERSIES_HEIGHT } from "@/utilities/constants";
 import Animated, { runOnJS, useAnimatedGestureHandler, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { Gesture, PanGestureHandler } from "react-native-gesture-handler";
-import { PanGesture } from "react-native-gesture-handler/lib/typescript/handlers/gestures/panGesture";
 
 interface Props {
     excersie: Excersies
     order: number
     onRemoveExcersies: (order: number) => void
-    positions: any
 }
 
-export const ExcersiesItem = ({ excersie, order, onRemoveExcersies, positions }: Props) => {
+export const ExcersiesItem = ({ excersie, order, onRemoveExcersies }: Props) => {
 
     const [isDragging, setIsDragging] = useState(false);
 
@@ -48,7 +46,7 @@ export const ExcersiesItem = ({ excersie, order, onRemoveExcersies, positions }:
             key={order}
             style={[
                 styles.excersies,
-                animatedStyle
+                
             ]}
         >
             <PanGestureHandler onGestureEvent={gestureHandler}>

@@ -1,8 +1,9 @@
 import { Routine } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import uuid from "react-native-uuid";
 
 const defaultRoutine: Routine = {
-  id: "0",
+  id: uuid.v4(),
   title: "Default routine",
   description: "Warm-up routine",
   duration: 75,
@@ -27,6 +28,6 @@ export const saveRoutines = async (routines: Routine[]): Promise<void> => {
   await AsyncStorage.setItem("routines", JSON.stringify(routines));
 };
 
-export const clearRoutines = async(): Promise<void> => {
-  await AsyncStorage.clear()
-}
+export const clearRoutines = async (): Promise<void> => {
+  await AsyncStorage.clear();
+};

@@ -12,12 +12,14 @@ export const useRoutines = () => {
     const savedRoutines = await getSavedRoutines();
     if (savedRoutines) {
       const selectedRoutine: Routine | undefined = savedRoutines.find(
-        (routine: Routine) => routine.id === routineId
+        (routine: Routine) => routine.id == routineId
       );
 
       if (!selectedRoutine) {
         router.push("/add-routine");
       }
+
+      console.log(selectedRoutine)
 
       return selectedRoutine;
     } else {
