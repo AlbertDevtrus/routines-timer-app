@@ -14,10 +14,10 @@ type Props = PropsWithChildren<{
     selectRoutine?: any;
     id?: string;
     routines: Routine[];
-
+    activeExcersie?: any
 }>;
 
-export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, id, routines }: Props) {
+export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, id, routines, activeExcersie }: Props) {
 
     const { getRoutine } = useRoutines();
 
@@ -29,8 +29,8 @@ export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, 
     const handlePressIn = async (id: string) => {
         const routineSelected = await getRoutine(id);
 
-        console.log(routineSelected)
         selectRoutine(routineSelected);
+        activeExcersie(routineSelected?.excersies[0])
         onClose()
     };
 
@@ -63,11 +63,6 @@ export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, 
                             ))}
                         </View>
                     </ScrollView>
-                    <View>
-                        {/* <Pressable onPress={handlePress} style={({ pressed }) => [{ backgroundColor: pressed ? "rgba(0, 5, 5, 0.40)" : "rgba(0, 5, 5, 0.20)" }, styles.button]}>
-                            <Text style={styles.text}>Add</Text>
-                        </Pressable> */}
-                    </View>
                 </View>
             </View>
         </Modal>
