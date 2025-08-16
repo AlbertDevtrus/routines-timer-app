@@ -1,16 +1,23 @@
-import { useFonts } from "expo-font";
-import { Text, View, StyleSheet, Pressable } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { getSavedRoutines } from "@/utilities/routinesStorage";
-import SelectRoutineModal from "@/components/SelectRoutineModal";
-import { useRoutines } from "@/hooks/useRoutines";
 import { Excersies, Routine } from "@/types";
-import RoutineCard from "@/components/RoutineCard";
+
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useState } from "react";
+import { View, StyleSheet, Pressable, Text, Dimensions } from "react-native";
+import Animated, { useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withSpring, scrollTo, runOnJS, withDecay } from "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import formatTime from "@/utilities/formatTime";
+
+import { useFonts } from "expo-font";
+import { Ionicons } from "@expo/vector-icons";
+
+import SelectRoutineModal from "@/components/SelectRoutineModal";
+import RoutineCard from "@/components/RoutineCard";
+import { getSavedRoutines } from "@/utilities/routinesStorage";
+import { useRoutines } from "@/hooks/useRoutines";
+import ExerciesCounter from "@/components/ExerciesCounter";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+export const ITEM_WIDTH = SCREEN_WIDTH * 0.45;
+const SIDE_SPACING = (SCREEN_WIDTH - ITEM_WIDTH) / 2.75;
 
 export default function Timer() {
 
@@ -20,6 +27,8 @@ export default function Timer() {
   const [activeExcersie, setActiveExcersie] = useState<Excersies>();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRoutine, setSelectedRoutine] = useState<Routine | null>(null);
+  const [counter, setCounter] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const { routines, setRoutines } = useRoutines();
 
@@ -27,6 +36,19 @@ export default function Timer() {
   const animateStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
+
+  const scrollX = useSharedValue(0);
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+      const offsetX = event.contentOffset.x;
+      const index = Math.round(offsetX / ITEM_WIDTH);
+
+      runOnJS(setActiveIndex)(index);
+    },
+  });
 
   const handlePressIn = () => {
     setIsModalVisible(true);
@@ -37,6 +59,10 @@ export default function Timer() {
     scale.value = withSpring(1, { damping: 10 });
   };
 
+  const onCloseModal = () => {
+    setIsModalVisible(false);
+  }
+
   useEffect(() => {
     const fetchRoutines = async () => {
       const savedRoutines = await getSavedRoutines();
@@ -46,11 +72,43 @@ export default function Timer() {
       const firstRoutine = savedRoutines[0];
       setSelectedRoutine(firstRoutine)
       setActiveExcersie(firstRoutine.excersies[0]);
+      setCounter(firstRoutine.excersies[0].duration)
     };
 
     fetchRoutines();
 
   }, []);
+
+  useEffect(() => {
+    if (selectedRoutine && activeExcersie) {
+      const index = selectedRoutine.excersies.findIndex(
+        (e) => e.order === activeExcersie.order
+      );
+      scrollTo(scrollRef, index * ITEM_WIDTH, 0, true);
+    }
+  }, [activeExcersie]);
+
+  useEffect(() => {
+    if (selectedRoutine) {
+      const newExercise = selectedRoutine.excersies[activeIndex];
+      if (newExercise) {
+        setActiveExcersie(newExercise);
+        setCounter(newExercise.duration);
+      }
+    }
+  }, [activeIndex]);
+
+  useEffect(() => {
+    if (selectedRoutine && scrollRef.current) {
+      setTimeout(() => {
+        scrollTo(scrollRef, 40, 0, true);
+        setTimeout(() => {
+          scrollTo(scrollRef, 0, 0, true);
+        }, 600);
+      }, 800);
+    }
+  }, [selectedRoutine]);
+
 
   return (
     <GestureHandlerRootView>
@@ -58,24 +116,30 @@ export default function Timer() {
         colors={["#6B5E31", "#442800"]}
         style={styles.container}
       >
-        {
-          activeExcersie ?
-            <>
-              <Text style={styles.title}>{activeExcersie.type}</Text>
-              <View style={styles.counter_container}>
-                <Text style={styles.counter}>{formatTime(activeExcersie.duration)}</Text>
-              </View>
-            </>
-            :
-            <>
-              <>
-                <Text style={styles.title}>Add excersies</Text>
-                <View style={styles.counter_container}>
-                  <Text style={styles.counter}>0:00</Text>
-                </View>
-              </>
-            </>
-        }
+        <Animated.ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          onScroll={scrollHandler}
+          scrollEventThrottle={10}
+          snapToInterval={ITEM_WIDTH}
+          decelerationRate="fast"
+          snapToAlignment="start"
+          contentContainerStyle={{
+            paddingHorizontal: SIDE_SPACING,
+          }}
+        >
+          {selectedRoutine?.excersies.map((ex, index) => (
+            <ExerciesCounter
+              key={ex.order}
+              excersie={ex}
+              isActive={activeExcersie?.order === ex.order}
+              counter={counter}
+              isLast={index === selectedRoutine.excersies.length - 1}
+              isFirst={index === 0}
+            />
+          ))}
+        </Animated.ScrollView>
         {
           selectedRoutine && (
             <RoutineCard duration={selectedRoutine?.duration} id={selectedRoutine.id} title={selectedRoutine.title} isLink={false} isPressable={true} handlePress={handlePressIn} handlePressOut={handlePressOut} animateStyle={animateStyle} />
@@ -87,7 +151,7 @@ export default function Timer() {
           </Animated.View>
         </Pressable>
         <View>
-          <SelectRoutineModal isVisible={isModalVisible} onClose={() => setIsModalVisible(false)} routines={routines} selectRoutine={setSelectedRoutine} activeExcersie={setActiveExcersie} />
+          <SelectRoutineModal isVisible={isModalVisible} onClose={onCloseModal} routines={routines} selectRoutine={setSelectedRoutine} activeExcersie={setActiveExcersie} />
         </View>
       </LinearGradient>
     </GestureHandlerRootView>
@@ -99,7 +163,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: " #6B5E31 0%, #442800 100%",
     alignItems: "center",
-    paddingHorizontal: 40,
+    paddingHorizontal: 30,
   },
   title: {
     color: "rgba(255, 255, 255, 0.60)",
@@ -109,17 +173,6 @@ const styles = StyleSheet.create({
     fontFamily: "Red Hat Display",
     marginTop: 80,
     textTransform: "capitalize"
-  },
-  counter: {
-    fontSize: 64,
-    color: "white",
-    fontFamily: "Red Hat Display",
-  },
-  counter_container: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 150,
-    marginBottom: 110,
   },
   routine_container: {
     width: "100%",
@@ -147,5 +200,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 50,
+  },
+  counter: {
+    fontSize: 40,
+    color: "white",
+    fontFamily: "Red Hat Display",
+    transitionDuration: "200ms",
+  },
+  counter_container: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 150,
+    marginBottom: 110,
+  },
+  excersiesContainer: {
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+
+  exerciseItem: {
+    width: 300,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

@@ -17,7 +17,7 @@ type Props = PropsWithChildren<{
     activeExcersie?: any
 }>;
 
-export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, id, routines, activeExcersie }: Props) {
+export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, routines, activeExcersie }: Props) {
 
     const { getRoutine } = useRoutines();
 
@@ -31,7 +31,7 @@ export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, 
 
         selectRoutine(routineSelected);
         activeExcersie(routineSelected?.excersies[0])
-        onClose()
+        onClose();
     };
 
     return (

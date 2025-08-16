@@ -19,8 +19,6 @@ export const useRoutines = () => {
         router.push("/add-routine");
       }
 
-      console.log(selectedRoutine)
-
       return selectedRoutine;
     } else {
       router.push("/routines");
