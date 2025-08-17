@@ -3,7 +3,7 @@ import { Excersies, Routine } from "@/types";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, Pressable, Text, Dimensions } from "react-native";
-import Animated, { useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withSpring, scrollTo, runOnJS, withDecay } from "react-native-reanimated";
+import Animated, { useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withSpring, scrollTo, runOnJS, withDecay, withTiming, interpolateColor } from "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { useFonts } from "expo-font";
@@ -14,6 +14,7 @@ import RoutineCard from "@/components/RoutineCard";
 import { getSavedRoutines } from "@/utilities/routinesStorage";
 import { useRoutines } from "@/hooks/useRoutines";
 import ExerciesCounter from "@/components/ExerciesCounter";
+import { useTabStore } from "@/stores/tabStore";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 export const ITEM_WIDTH = SCREEN_WIDTH * 0.45;
@@ -29,6 +30,8 @@ export default function Timer() {
   const [selectedRoutine, setSelectedRoutine] = useState<Routine | null>(null);
   const [counter, setCounter] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
+  
+  const { setTabStyle } = useTabStore();
 
   const { routines, setRoutines } = useRoutines();
 
@@ -99,21 +102,30 @@ export default function Timer() {
   }, [activeIndex]);
 
   useEffect(() => {
-    if (selectedRoutine && scrollRef.current) {
-      setTimeout(() => {
-        scrollTo(scrollRef, 40, 0, true);
-        setTimeout(() => {
-          scrollTo(scrollRef, 0, 0, true);
-        }, 600);
-      }, 800);
-    }
-  }, [selectedRoutine]);
+    if (activeExcersie) {
+      let tabColor = "#442800";
+      let headerColor = "#6B5E31";
 
+      if (activeExcersie.type === "warm-up") {
+        tabColor = "#442800";
+        headerColor = "#6B5E31";
+      } else if (activeExcersie.type === "rest") {
+        tabColor = "#015911";
+        headerColor = "#4FA04A";
+      } else if (activeExcersie.type === "workout") {
+        tabColor = "#440001";
+        headerColor = "#923B3B";
+      }
+
+      setTabStyle("index", { tabColor, headerColor });
+
+    }
+  }, [activeExcersie]);
 
   return (
     <GestureHandlerRootView>
       <LinearGradient
-        colors={["#6B5E31", "#442800"]}
+        colors={activeExcersie?.type === "warm-up" ? ["#6B5E31", "#442800"] : activeExcersie?.type === "rest" ? ["#4FA04A", "#015911"] : activeExcersie?.type === "workout" ? ["#923B3B", "#440001"] : ["#6B5E31", "#442800"]}
         style={styles.container}
       >
         <Animated.ScrollView
@@ -135,8 +147,6 @@ export default function Timer() {
               excersie={ex}
               isActive={activeExcersie?.order === ex.order}
               counter={counter}
-              isLast={index === selectedRoutine.excersies.length - 1}
-              isFirst={index === 0}
             />
           ))}
         </Animated.ScrollView>

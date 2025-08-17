@@ -1,25 +1,24 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient"; // 👈 importa gradient
 import formatTime from "@/utilities/formatTime";
 import { ITEM_WIDTH } from "@/app/(tabs)";
 
-export default function ExerciesCounter({ excersie, isActive, counter, isLast, isFirst }) {
+interface Props {
+    excersie: any,
+    isActive: boolean,
+    counter: number,
+}
+
+export default function ExerciesCounter({ excersie, isActive, counter }: Props) {
     const animatedStyle = useAnimatedStyle(() => {
         return {
             transform: [
-                {
-                    scale: withTiming(isActive ? 1.25 : 1, { duration: 100 }),
-                },
+                { scale: withTiming(isActive ? 1.5 : 1, { duration: 100 }) },
+                { translateY: withTiming(isActive ? 0 : 10, { duration: 100 }) },
             ],
         };
     });
-
-    if (isLast && isFirst) {
-        isLast = false;
-        isFirst = false;
-    }
 
     return (
         <View
@@ -28,7 +27,7 @@ export default function ExerciesCounter({ excersie, isActive, counter, isLast, i
                 isActive ? styles.activeExercise : styles.inactiveExercise,
             ]}
         >
-            <Text style={styles.title}>{excersie.type}</Text>
+            <Text style={[styles.title, isActive ? "" : styles.inactiveTitle]}>{excersie.type}</Text>
             <View style={styles.counter_container}>
                 <Animated.Text style={[styles.counter, animatedStyle]}>
                     {isActive ? formatTime(counter) : formatTime(excersie.duration)}
@@ -49,7 +48,7 @@ const styles = StyleSheet.create({
         textTransform: "capitalize"
     },
     counter: {
-        fontSize: 48,
+        fontSize: 40,
         color: "white",
         fontFamily: "Red Hat Display",
         transitionDuration: "200ms",
@@ -74,4 +73,7 @@ const styles = StyleSheet.create({
     inactiveExercise: {
         opacity: 0.2,
     },
+    inactiveTitle: {
+        opacity: 0,
+    }
 });
