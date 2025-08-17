@@ -1,9 +1,9 @@
 import { Excersies, Routine } from "@/types";
 
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Pressable, Text, Dimensions } from "react-native";
-import Animated, { useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withSpring, scrollTo, runOnJS, withDecay, withTiming, interpolateColor } from "react-native-reanimated";
+import Animated, { useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withSpring, scrollTo, runOnJS, withDecay, withTiming, interpolateColor, runOnUI } from "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { useFonts } from "expo-font";
@@ -26,11 +26,15 @@ export default function Timer() {
     "Red Hat Display": require("@/assets/fonts/RedHatDisplay-Regular.ttf"),
   });
   const [activeExcersie, setActiveExcersie] = useState<Excersies>();
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRoutine, setSelectedRoutine] = useState<Routine | null>(null);
-  const [counter, setCounter] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
-  
+
+  const [counter, setCounter] = useState(0);
+  const [counterRun, setCounterRun] = useState(false);
+  const counterIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const { setTabStyle } = useTabStore();
 
   const { routines, setRoutines } = useRoutines();
@@ -39,6 +43,11 @@ export default function Timer() {
   const animateStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
+
+  const playScale = useSharedValue(1);
+  const playBtnAnimatedStyles = useAnimatedStyle(() => ({
+    transform: [{ scale: playScale.value }],
+  }))
 
   const scrollX = useSharedValue(0);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -61,6 +70,41 @@ export default function Timer() {
   const handlePressOut = () => {
     scale.value = withSpring(1, { damping: 10 });
   };
+
+  const handleCounter = () => {
+    playScale.value = withSpring(0.8, { damping: 10 });
+    const counterState = !counterRun;
+    setCounterRun(counterState);
+
+    if (!counterState) {
+      clearInterval(counterIntervalRef.current);
+      return;
+    }
+
+    startCounter(counter);
+
+  }
+
+  const handleCounterPressOut = () => {
+    playScale.value = withSpring(1, { damping: 10 });
+  };
+
+  const startCounter = (counter: number) => {
+    counterIntervalRef.current = setInterval(() => {
+      setCounter((prev) => {
+        if (counter) {
+          if (prev <= 1) {
+            clearInterval(counterIntervalRef.current);
+            setCounterRun(false);
+            return 0;
+          }
+          return prev - 1;
+        } else {
+          return prev + 1;
+        }
+      });
+    }, 1000);
+  }
 
   const onCloseModal = () => {
     setIsModalVisible(false);
@@ -98,6 +142,9 @@ export default function Timer() {
         setActiveExcersie(newExercise);
         setCounter(newExercise.duration);
       }
+
+      clearInterval(counterIntervalRef.current);
+      setCounterRun(false);
     }
   }, [activeIndex]);
 
@@ -121,6 +168,24 @@ export default function Timer() {
 
     }
   }, [activeExcersie]);
+
+  useEffect(() => {
+    if (selectedRoutine) {
+      const firstExercise = selectedRoutine.excersies[0];
+      setActiveExcersie(firstExercise);
+      setCounter(firstExercise.duration);
+
+      setActiveIndex(0);
+
+      clearInterval(counterIntervalRef.current);
+      setCounterRun(false);
+
+      runOnUI(() => {
+        scrollTo(scrollRef, 0, 0, false);
+      })();
+    }
+  }, [selectedRoutine]);
+
 
   return (
     <GestureHandlerRootView>
@@ -155,11 +220,21 @@ export default function Timer() {
             <RoutineCard duration={selectedRoutine?.duration} id={selectedRoutine.id} title={selectedRoutine.title} isLink={false} isPressable={true} handlePress={handlePressIn} handlePressOut={handlePressOut} animateStyle={animateStyle} />
           )
         }
-        <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
-          <Animated.View style={[styles.button, animateStyle]}>
-            <Ionicons name="play-outline" size={50} color="white" />
-          </Animated.View>
-        </Pressable>
+        {
+          counterRun ? (
+            <Pressable onPressIn={handleCounter} onPressOut={handleCounterPressOut}>
+              <Animated.View style={[styles.button, playBtnAnimatedStyles]}>
+                <Ionicons name="pause-outline" size={50} color="white" />
+              </Animated.View>
+            </Pressable>
+          ) : (
+            <Pressable onPressIn={handleCounter} onPressOut={handleCounterPressOut}>
+              <Animated.View style={[styles.button, playBtnAnimatedStyles]}>
+                <Ionicons name="play-outline" size={50} color="white" />
+              </Animated.View>
+            </Pressable>
+          )
+        }
         <View>
           <SelectRoutineModal isVisible={isModalVisible} onClose={onCloseModal} routines={routines} selectRoutine={setSelectedRoutine} activeExcersie={setActiveExcersie} />
         </View>

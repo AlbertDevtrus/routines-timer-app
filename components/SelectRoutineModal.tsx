@@ -1,8 +1,7 @@
-import { Modal, View, Text, Pressable, StyleSheet, TextInput } from 'react-native';
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
+import { PropsWithChildren } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ScrollView } from 'react-native-gesture-handler';
-import { getSavedRoutines } from '@/utilities/routinesStorage';
 import { useRoutines } from '@/hooks/useRoutines';
 import RoutineCard from './RoutineCard';
 import { Routine } from '@/types';
@@ -28,6 +27,11 @@ export default function SelectRoutineModal({ isVisible, onClose, selectRoutine, 
 
     const handlePressIn = async (id: string) => {
         const routineSelected = await getRoutine(id);
+        
+        if(routineSelected?.excersies.length < 1) {
+            onClose();
+            return;
+        }
 
         selectRoutine(routineSelected);
         activeExcersie(routineSelected?.excersies[0])
